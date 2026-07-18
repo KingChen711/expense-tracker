@@ -1,26 +1,118 @@
 @import "tailwindcss";
 
+/*
+  Token system for "Chi tiêu" — a personal ledger, not a landing page.
+  Ground: cool charcoal surfaces (not pure black) + a jade accent tied to
+  the finance domain (growth/money), kept separate from the semantic
+  red (expense/over-budget) and amber (approaching budget limit) colors.
+*/
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.5rem;
+
+  --background: #f5f7f6;
+  --foreground: #16201c;
+  --card: #ffffff;
+  --card-foreground: #16201c;
+  --popover: #ffffff;
+  --popover-foreground: #16201c;
+  --primary: #1f9c74;
+  --primary-foreground: #f5fffb;
+  --secondary: #e7ebe9;
+  --secondary-foreground: #16201c;
+  --muted: #eef1ef;
+  --muted-foreground: #5c6b65;
+  --accent: #e1e7e4;
+  --accent-foreground: #16201c;
+  --destructive: #c93a3e;
+  --destructive-foreground: #fff5f5;
+  --warning: #b9790c;
+  --warning-foreground: #fff8ec;
+  --border: #dde3e0;
+  --input: #dde3e0;
+  --ring: #1f9c74;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #12161b;
+    --foreground: #e8ecef;
+    --card: #1a1f26;
+    --card-foreground: #e8ecef;
+    --popover: #1a1f26;
+    --popover-foreground: #e8ecef;
+    --primary: #2fbf8f;
+    --primary-foreground: #0e1512;
+    --secondary: #232a32;
+    --secondary-foreground: #e8ecef;
+    --muted: #1e242b;
+    --muted-foreground: #8b98a5;
+    --accent: #26313a;
+    --accent-foreground: #e8ecef;
+    --destructive: #e5484d;
+    --destructive-foreground: #fbeaea;
+    --warning: #f2b84b;
+    --warning-foreground: #241900;
+    --border: #262d36;
+    --input: #262d36;
+    --ring: #2fbf8f;
+  }
+}
+
+/*
+  Tailwind v4 no longer gives the bare `border`/`divide-y` utilities a
+  default color — they inherit `currentColor`, which is near-white text in
+  dark mode. Restore the old (and shadcn's default) behavior: every border
+  uses the theme's --border token unless a class explicitly overrides it.
+*/
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+  ::placeholder {
+    color: var(--muted-foreground);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+.font-tabular {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
 }

@@ -1,0 +1,30 @@
+{
+  "name": "Chi tiêu - Sổ chi tiêu cá nhân",
+  "short_name": "Chi tiêu",
+  "description": "App ghi chú chi tiêu cá nhân",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#12161b",
+  "theme_color": "#2fbf8f",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
