@@ -3,6 +3,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 export default async function ExportSettingsPage({
   searchParams,
@@ -68,9 +69,9 @@ export default async function ExportSettingsPage({
                 className="flex h-9 w-full rounded-md border border-input bg-transparent text-sm file:mr-3 file:h-full file:border-0 file:bg-secondary file:px-3 file:text-secondary-foreground"
               />
             </div>
-            <Button type="submit" className="w-full">
+            <SubmitButton className="w-full">
               Nhập dữ liệu
-            </Button>
+            </SubmitButton>
           </form>
         </CardContent>
       </Card>

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 export default async function LoginPage({
   searchParams,
@@ -28,9 +29,9 @@ export default async function LoginPage({
               <Input id="password" name="password" type="password" required />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full">
+            <SubmitButton className="w-full">
               Đăng nhập
-            </Button>
+            </SubmitButton>
           </form>
         </CardContent>
       </Card>

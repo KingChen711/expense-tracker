@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Category, RecurringTemplate, TransactionType } from "@/lib/types"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10)
@@ -161,9 +162,9 @@ export function RecurringForm({
         </div>
       )}
 
-      <Button type="submit" className="w-full">
+      <SubmitButton className="w-full">
         {template ? "Lưu thay đổi" : "Thêm giao dịch định kỳ"}
-      </Button>
+      </SubmitButton>
     </form>
   )
 }

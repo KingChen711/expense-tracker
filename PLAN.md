@@ -91,7 +91,11 @@ Khi tải trang `/dashboard` (Server Component), chạy hàm catch-up trước k
 3. ✅ **Biểu đồ + Ngân sách** — hoàn tất, test local OK (kèm fix sự cố CSS theme, xem mục "Sự cố đã xử lý").
 4. ✅ **Giao dịch định kỳ** — hoàn tất, test local OK.
 5. ✅ **Theo dõi nợ** — hoàn tất, test local OK.
-6. 🔄 **Export/Import + PWA + Deploy**: ✅ Export/Import (JSON+CSV) test OK. ✅ PWA (manifest, icon, service worker) — đã xác nhận SW active qua devtools, chưa test "Add to Home screen" thật trên thiết bị (cần deploy trước vì cần HTTPS thật). Còn lại: deploy lên Vercel.
+6. ✅ **Export/Import + PWA + Deploy** — hoàn tất. Export/Import (JSON+CSV) test OK. PWA (manifest, icon, service worker) xác nhận hoạt động cả local lẫn production. Đã deploy lên Vercel: https://expense-tracker-navy-zeta-39.vercel.app — còn lại: cài "Add to Home screen" thật trên Android + laptop (người dùng tự làm, xem hướng dẫn bên dưới).
+
+### Cài đặt PWA
+- **Android (Chrome)**: mở URL trên → menu (⋮) → "Add to Home screen" / "Cài đặt ứng dụng".
+- **Laptop (Chrome/Edge)**: mở URL → icon "Cài đặt" (⊕ hoặc màn hình có mũi tên) ở cuối thanh địa chỉ → Install.
 
 > Lưu ý kỹ thuật milestone 6: **không dùng `@ducanh2912/next-pwa`** (hay next-pwa nói chung) như plan gốc dự tính — các plugin PWA hiện tại đều dựa vào Webpack build plugin, trong khi Next.js 16 mặc định build bằng Turbopack (mix 2 thứ này rủi ro cao, đã gặp nhiều bất ngờ tương thích trong dự án này rồi). Thay vào đó tự viết `public/sw.js` (service worker tối giản, cache app shell) + `public/manifest.json` tay — đủ để đạt tiêu chí "installable" trên Android/Chrome mà không phụ thuộc build plugin dễ vỡ.
 

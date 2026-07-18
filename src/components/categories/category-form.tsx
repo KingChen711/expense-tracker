@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Category, TransactionType } from "@/lib/types"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 const TYPE_ITEMS = [
   { value: "expense", label: "Chi tiêu" },
@@ -72,9 +73,9 @@ export function CategoryForm({
         </div>
       </div>
 
-      <Button type="submit" className="w-full">
+      <SubmitButton className="w-full">
         {category ? "Lưu thay đổi" : "Thêm danh mục"}
-      </Button>
+      </SubmitButton>
     </form>
   )
 }

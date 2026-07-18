@@ -4,6 +4,7 @@ import { deleteRecurringTemplate } from "@/lib/actions/recurring"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { formatVND } from "@/lib/format"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 export default async function RecurringPage() {
   const templates = await getRecurringTemplates()
@@ -65,9 +66,9 @@ export default async function RecurringPage() {
               </Link>
               <form action={deleteRecurringTemplate}>
                 <input type="hidden" name="id" value={t.id} />
-                <Button type="submit" variant="destructive" size="sm">
+                <SubmitButton variant="destructive" size="sm">
                   Xoá
-                </Button>
+                </SubmitButton>
               </form>
             </div>
           </li>

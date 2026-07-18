@@ -7,6 +7,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { formatVND } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import type { TransactionType } from "@/lib/types"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 export default async function TransactionsPage({
   searchParams,
@@ -98,9 +99,9 @@ export default async function TransactionsPage({
               </Link>
               <form action={deleteTransaction}>
                 <input type="hidden" name="id" value={t.id} />
-                <Button type="submit" variant="destructive" size="sm">
+                <SubmitButton variant="destructive" size="sm">
                   Xoá
-                </Button>
+                </SubmitButton>
               </form>
             </div>
           </li>

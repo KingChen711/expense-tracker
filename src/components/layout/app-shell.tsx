@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { signOut } from "@/lib/actions/auth"
 import { cn } from "@/lib/utils"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Tổng quan", icon: LayoutDashboard },
@@ -87,14 +88,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="border-t p-2">
           <form action={signOut}>
-            <Button
-              type="submit"
+            <SubmitButton
               variant="ghost"
               size="sm"
               className="w-full justify-start"
             >
               Đăng xuất
-            </Button>
+            </SubmitButton>
           </form>
         </div>
       </aside>
@@ -138,14 +138,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             />
             <div className="mt-2 border-t p-2">
               <form action={signOut}>
-                <Button
-                  type="submit"
+                <SubmitButton
                   variant="ghost"
                   size="sm"
                   className="w-full justify-start"
                 >
                   Đăng xuất
-                </Button>
+                </SubmitButton>
               </form>
             </div>
           </div>

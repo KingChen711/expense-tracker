@@ -4,6 +4,7 @@ import { deleteBudget } from "@/lib/actions/budgets"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { formatVND } from "@/lib/format"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 export default async function BudgetsPage() {
   const budgets = await getBudgetsWithSpending()
@@ -53,9 +54,9 @@ export default async function BudgetsPage() {
                   </Link>
                   <form action={deleteBudget}>
                     <input type="hidden" name="id" value={b.id} />
-                    <Button type="submit" variant="destructive" size="sm">
+                    <SubmitButton variant="destructive" size="sm">
                       Xoá
-                    </Button>
+                    </SubmitButton>
                   </form>
                 </div>
               </div>

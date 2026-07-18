@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Category, Transaction, TransactionType } from "@/lib/types"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10)
@@ -133,9 +134,9 @@ export function TransactionForm({
         />
       </div>
 
-      <Button type="submit" className="w-full">
+      <SubmitButton className="w-full">
         {transaction ? "Lưu thay đổi" : "Thêm giao dịch"}
-      </Button>
+      </SubmitButton>
     </form>
   )
 }

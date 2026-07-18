@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Category } from "@/lib/types"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 export function NewBudgetForm({
   categories,
@@ -53,9 +54,9 @@ export function NewBudgetForm({
         />
       </div>
 
-      <Button type="submit" className="w-full">
+      <SubmitButton className="w-full">
         Thêm ngân sách
-      </Button>
+      </SubmitButton>
     </form>
   )
 }

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 export default function NewDebtPage() {
   return (
@@ -39,9 +40,9 @@ export default function NewDebtPage() {
             <Input id="note" name="note" type="text" placeholder="Không bắt buộc" />
           </div>
 
-          <Button type="submit" className="w-full">
+          <SubmitButton className="w-full">
             Thêm khoản nợ
-          </Button>
+          </SubmitButton>
         </form>
       </CardContent>
     </Card>

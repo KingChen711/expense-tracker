@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { formatVND } from "@/lib/format"
+import { SubmitButton } from "@/components/ui/submit-button"
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10)
@@ -47,9 +48,9 @@ export default async function DebtDetailPage({
               </Link>
               <form action={deleteDebt}>
                 <input type="hidden" name="id" value={debt.id} />
-                <Button type="submit" variant="destructive" size="sm">
+                <SubmitButton variant="destructive" size="sm">
                   Xoá
-                </Button>
+                </SubmitButton>
               </form>
             </div>
           </div>
@@ -118,9 +119,9 @@ export default async function DebtDetailPage({
                 <Label htmlFor="note">Ghi chú</Label>
                 <Input id="note" name="note" type="text" placeholder="Không bắt buộc" />
               </div>
-              <Button type="submit" className="w-full">
+              <SubmitButton className="w-full">
                 Ghi nhận
-              </Button>
+              </SubmitButton>
             </form>
           </CardContent>
         </Card>
@@ -148,9 +149,9 @@ export default async function DebtDetailPage({
                 <form action={deleteDebtPayment}>
                   <input type="hidden" name="id" value={p.id} />
                   <input type="hidden" name="debt_id" value={debt.id} />
-                  <Button type="submit" variant="destructive" size="sm">
+                  <SubmitButton variant="destructive" size="sm">
                     Xoá
-                  </Button>
+                  </SubmitButton>
                 </form>
               </li>
             ))}
