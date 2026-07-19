@@ -25,7 +25,10 @@ export function MonthlyTrendChart({ data }: { data: MonthlyTrendItem[] }) {
             new Intl.NumberFormat("vi-VN", { notation: "compact" }).format(value)
           }
         />
-        <Tooltip formatter={(value) => formatVND(Number(value))} />
+        <Tooltip
+          formatter={(value) => formatVND(Number(value))}
+          contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)", borderRadius: "12px" }}
+        />
         <Legend
           formatter={(value) => (value === "income" ? "Thu nhập" : "Chi tiêu")}
         />

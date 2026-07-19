@@ -1,10 +1,12 @@
 import Link from "next/link"
+import { WalletCards } from "lucide-react"
 import { getBudgetsWithSpending } from "@/lib/data/budgets"
 import { deleteBudget } from "@/lib/actions/budgets"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { formatVND } from "@/lib/format"
 import { SubmitButton } from "@/components/ui/submit-button"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export default async function BudgetsPage() {
   const budgets = await getBudgetsWithSpending()
@@ -22,10 +24,12 @@ export default async function BudgetsPage() {
       </div>
 
       {budgets.length === 0 && (
-        <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-          Chưa có ngân sách nào cho tháng này. Đặt hạn mức cho một danh mục
-          chi tiêu để theo dõi mức độ vượt chi.
-        </div>
+        <EmptyState
+          icon={WalletCards}
+          title="Đặt ngân sách đầu tiên"
+          description="Đặt hạn mức cho một danh mục chi tiêu để biết khi nào cần chậm lại."
+          action={<Link href="/budgets/new" className={buttonVariants()}>+ Thêm ngân sách</Link>}
+        />
       )}
 
       <ul className="space-y-3">
@@ -61,7 +65,7 @@ export default async function BudgetsPage() {
                 </div>
               </div>
 
-              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-muted">
                 <div
                   className={cn(
                     "h-full rounded-full",

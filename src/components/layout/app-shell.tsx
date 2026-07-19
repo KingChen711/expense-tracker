@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -9,13 +10,12 @@ import {
   Landmark,
   LayoutDashboard,
   Menu,
-  PiggyBank,
+  Plus,
   Repeat,
   Tags,
   Wallet,
   X,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { signOut } from "@/lib/actions/auth"
 import { cn } from "@/lib/utils"
 import { SubmitButton } from "@/components/ui/submit-button"
@@ -33,7 +33,13 @@ const NAV_ITEMS = [
 function Brand() {
   return (
     <div className="flex items-center gap-2">
-      <PiggyBank className="size-5 text-primary" />
+      <Image
+        src="/icons/icon-192.png"
+        alt=""
+        width={28}
+        height={28}
+        className="size-7 rounded-lg"
+      />
       <span className="text-lg font-bold tracking-tight">Chi tiêu</span>
     </div>
   )
@@ -151,9 +157,58 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <main className="flex-1 p-4 md:p-8">
+      <main className="flex-1 p-4 pb-24 md:p-8">
         <div className="mx-auto max-w-3xl">{children}</div>
       </main>
+
+      <nav
+        aria-label="Điều hướng nhanh"
+        className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-2xl border bg-card/95 p-1.5 shadow-lg backdrop-blur md:hidden"
+      >
+        {NAV_ITEMS.slice(0, 2).map((item) => {
+          const Icon = item.icon
+          const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium",
+                active ? "bg-primary/10 text-primary" : "text-muted-foreground"
+              )}
+            >
+              <Icon className="size-4" />
+              {item.label}
+            </Link>
+          )
+        })}
+        <Link
+          href="/transactions/new"
+          aria-label="Thêm giao dịch"
+          className="-mt-5 flex justify-center"
+        >
+          <span className="flex size-14 items-center justify-center rounded-2xl border-4 border-background bg-primary text-primary-foreground shadow-md">
+            <Plus className="size-6" />
+          </span>
+        </Link>
+        {NAV_ITEMS.slice(3, 5).map((item) => {
+          const Icon = item.icon
+          const active = pathname === item.href || pathname.startsWith(`${item.href}/`)
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium",
+                active ? "bg-primary/10 text-primary" : "text-muted-foreground"
+              )}
+            >
+              <Icon className="size-4" />
+              {item.label}
+            </Link>
+          )
+        })}
+      </nav>
     </div>
   )
 }

@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -44,14 +43,14 @@ export function TransactionFilters({
     <form
       action="/transactions"
       method="GET"
-      className="flex flex-wrap items-end gap-3 rounded-lg border p-3"
+      className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-3 sm:p-4"
     >
-      <div className="w-40 space-y-1.5">
+      <div className="min-w-36 flex-1 space-y-1.5 sm:flex-none">
         <Label htmlFor="from">Từ ngày</Label>
         <Input id="from" name="from" type="date" defaultValue={defaultValues.from} />
       </div>
 
-      <div className="w-40 space-y-1.5">
+      <div className="min-w-36 flex-1 space-y-1.5 sm:flex-none">
         <Label htmlFor="to">Đến ngày</Label>
         <Input id="to" name="to" type="date" defaultValue={defaultValues.to} />
       </div>

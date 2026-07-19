@@ -13,6 +13,8 @@ export function CategoryPieChart({ data }: { data: CategoryBreakdownItem[] }) {
     )
   }
 
+  const total = data.reduce((sum, item) => sum + item.total, 0)
+
   return (
     <div className="space-y-3">
       <ResponsiveContainer width="100%" height={220}>
@@ -29,11 +31,14 @@ export function CategoryPieChart({ data }: { data: CategoryBreakdownItem[] }) {
               <Cell key={entry.categoryId ?? "none"} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => formatVND(Number(value))} />
+          <Tooltip
+            formatter={(value) => formatVND(Number(value))}
+            contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)", borderRadius: "12px" }}
+          />
         </PieChart>
       </ResponsiveContainer>
-      <ul className="space-y-1 text-sm">
-        {data.map((item) => (
+      <ul className="space-y-2 text-sm">
+        {data.slice(0, 6).map((item) => (
           <li
             key={item.categoryId ?? "none"}
             className="flex items-center justify-between gap-2"
@@ -45,10 +50,14 @@ export function CategoryPieChart({ data }: { data: CategoryBreakdownItem[] }) {
               />
               {item.name}
             </span>
-            <span className="shrink-0 font-medium">{formatVND(item.total)}</span>
+            <span className="shrink-0 text-right">
+              <span className="font-medium">{formatVND(item.total)}</span>
+              <span className="ml-2 text-xs text-muted-foreground">{Math.round((item.total / total) * 100)}%</span>
+            </span>
           </li>
         ))}
       </ul>
+      {data.length > 6 && <p className="text-xs text-muted-foreground">+ {data.length - 6} danh mục khác</p>}
     </div>
   )
 }

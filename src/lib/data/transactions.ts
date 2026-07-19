@@ -58,3 +58,23 @@ export async function getTransactionById(id: string): Promise<Transaction | null
   if (error) throw error
   return data as unknown as Transaction | null
 }
+
+export async function getRecentCategoryIds(limit = 6): Promise<string[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("category_id")
+    .not("category_id", "is", null)
+    .order("occurred_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(limit * 3)
+
+  if (error) throw error
+
+  const seen = new Set<string>()
+  for (const row of data ?? []) {
+    if (row.category_id) seen.add(row.category_id)
+    if (seen.size === limit) break
+  }
+  return Array.from(seen)
+}

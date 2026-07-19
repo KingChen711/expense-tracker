@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowDownRight, ArrowUpRight, ChevronLeft, ChevronRight, WalletCards } from "lucide-react"
 import { getDashboardSummary } from "@/lib/data/dashboard"
+import { getBudgetsWithSpending } from "@/lib/data/budgets"
 import { getCategoryBreakdown, getMonthlyTrend } from "@/lib/data/stats"
 import { generateDueRecurringTransactions } from "@/lib/recurring/generate"
 import { DashboardFilters } from "@/components/dashboard/dashboard-filters"
@@ -61,19 +62,36 @@ export default async function DashboardPage({
   const prevHref = `/dashboard?from=${toISO(startOfMonth(prevMonth))}&to=${toISO(endOfMonth(prevMonth))}`
   const nextHref = `/dashboard?from=${toISO(startOfMonth(nextMonth))}&to=${toISO(endOfMonth(nextMonth))}`
 
-  const [{ balance, monthIncome, monthExpense }, categoryBreakdown, monthlyTrend] =
+  const [
+    { balance, monthIncome, monthExpense },
+    categoryBreakdown,
+    monthlyTrend,
+    budgets,
+  ] =
     await Promise.all([
       getDashboardSummary(range),
       getCategoryBreakdown(range),
       getMonthlyTrend(6, anchor),
+      isCurrentMonth ? getBudgetsWithSpending() : Promise.resolve([]),
     ])
+
+  const amountLeft = monthIncome - monthExpense
+  const previousMonth = monthlyTrend.at(-2)
+  const expenseChange = previousMonth ? monthExpense - previousMonth.expense : 0
+  const watchedBudgets = budgets.filter(
+    (budget) => budget.spent / budget.limitAmount >= 0.8
+  )
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Tổng quan</h1>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold">Tổng quan</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">Nắm nhanh tình hình tiền bạc của bạn.</p>
+        </div>
         <Link href="/transactions/new" className={buttonVariants()}>
-          + Thêm giao dịch
+          <span className="hidden sm:inline">+ Thêm giao dịch</span>
+          <span className="sm:hidden">+ Thêm</span>
         </Link>
       </div>
 
@@ -110,23 +128,24 @@ export default async function DashboardPage({
         )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="sm:col-span-2 lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-sm text-muted-foreground">
-              Số dư hiện tại
+              Còn lại trong kỳ
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p
               className={
-                balance < 0
+                amountLeft < 0
                   ? "font-tabular text-2xl font-semibold text-destructive"
                   : "font-tabular text-2xl font-semibold"
               }
             >
-              {formatVND(balance)}
+              {formatVND(amountLeft)}
             </p>
+            <p className="mt-1 text-xs text-muted-foreground">Thu nhập trừ chi tiêu {rangeLabel}</p>
           </CardContent>
         </Card>
 
@@ -153,9 +172,58 @@ export default async function DashboardPage({
             <p className="font-tabular text-2xl font-semibold text-destructive">
               {formatVND(monthExpense)}
             </p>
+            {previousMonth && (
+              <p
+                className={cn(
+                  "mt-1 flex items-center gap-1 text-xs",
+                  expenseChange > 0 ? "text-destructive" : "text-primary"
+                )}
+              >
+                {expenseChange > 0 ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
+                {expenseChange === 0
+                  ? "Không đổi so với tháng trước"
+                  : `${formatVND(Math.abs(expenseChange))} so với tháng trước`}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">Số dư tổng</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className={cn("font-tabular text-2xl font-semibold", balance < 0 && "text-destructive")}>
+              {formatVND(balance)}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Tất cả giao dịch đã ghi nhận</p>
           </CardContent>
         </Card>
       </div>
+
+      {isCurrentMonth && watchedBudgets.length > 0 && (
+        <Card className="border-warning/40 bg-warning/5">
+          <CardHeader className="flex-row items-center gap-2">
+            <WalletCards className="size-4 text-warning" />
+            <CardTitle>Cần chú ý ngân sách</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {watchedBudgets.slice(0, 3).map((budget) => {
+              const over = budget.spent > budget.limitAmount
+              const percent = Math.round((budget.spent / budget.limitAmount) * 100)
+              return (
+                <div key={budget.id} className="flex items-center justify-between gap-4 text-sm">
+                  <span className="min-w-0 truncate font-medium">{budget.category.name}</span>
+                  <span className={cn("shrink-0 font-tabular text-xs", over ? "text-destructive" : "text-warning")}>
+                    {over ? `Vượt ${formatVND(budget.spent - budget.limitAmount)}` : `Đã dùng ${percent}%`}
+                  </span>
+                </div>
+              )
+            })}
+            {watchedBudgets.length > 3 && <Link href="/budgets" className="inline-block text-sm font-medium text-primary hover:underline">Xem toàn bộ ngân sách</Link>}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
