@@ -1,80 +1,69 @@
-import { importData } from "@/lib/actions/import"
-import { Button, buttonVariants } from "@/components/ui/button"
+"use client"
+
+import { useState, type ChangeEvent } from "react"
+import { Download, RefreshCw, Upload } from "lucide-react"
+import { useLocalData, useSyncStatus } from "@/components/local-data-provider"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
-import { SubmitButton } from "@/components/ui/submit-button"
+import { importLocalSnapshot } from "@/lib/local/repository"
+import { syncNow } from "@/lib/local/sync"
+import { EMPTY_SNAPSHOT, type LocalSnapshot } from "@/lib/local/types"
 
-export default async function ExportSettingsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ imported?: string; error?: string }>
-}) {
-  const { imported, error } = await searchParams
+function downloadFile(name: string, content: string, type: string) {
+  const url = URL.createObjectURL(new Blob([content], { type }))
+  const anchor = document.createElement("a")
+  anchor.href = url
+  anchor.download = name
+  anchor.click()
+  URL.revokeObjectURL(url)
+}
 
-  return (
-    <div className="mx-auto max-w-md space-y-6">
-      <h1 className="text-xl font-semibold">Sao lưu &amp; khôi phục</h1>
+function csvEscape(value: unknown) {
+  const text = value == null ? "" : String(value)
+  return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text
+}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Xuất dữ liệu</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            Tải toàn bộ dữ liệu về máy để lưu trữ hoặc khôi phục sau này.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <a href="/api/export?format=json" className={buttonVariants()}>
-              Xuất JSON (backup đầy đủ)
-            </a>
-            <a
-              href="/api/export?format=csv"
-              className={cn(buttonVariants({ variant: "outline" }))}
-            >
-              Xuất CSV (giao dịch)
-            </a>
-          </div>
-        </CardContent>
-      </Card>
+export default function ExportSettingsPage() {
+  const { snapshot } = useLocalData()
+  const syncStatus = useSyncStatus()
+  const [message, setMessage] = useState<string | null>(null)
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Nhập lại dữ liệu</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            Chọn file JSON đã xuất trước đó để khôi phục. Dữ liệu sẽ được
-            thêm vào (không xoá dữ liệu hiện có).
-          </p>
-          {imported && (
-            <p className="rounded-md bg-primary/10 p-2 text-sm text-primary">
-              Đã nhập: {imported}
-            </p>
-          )}
-          {error && (
-            <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">
-              {error}
-            </p>
-          )}
-          <form action={importData} className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="file">File backup (.json)</Label>
-              <input
-                id="file"
-                name="file"
-                type="file"
-                accept="application/json"
-                required
-                className="flex h-9 w-full rounded-md border border-input bg-transparent text-sm file:mr-3 file:h-full file:border-0 file:bg-secondary file:px-3 file:text-secondary-foreground"
-              />
-            </div>
-            <SubmitButton className="w-full">
-              Nhập dữ liệu
-            </SubmitButton>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-  )
+  function exportJSON() {
+    downloadFile(`chi-tieu-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ exportedAt: new Date().toISOString(), ...snapshot }, null, 2), "application/json")
+  }
+
+  function exportCSV() {
+    const categoryMap = new Map(snapshot.categories.map((item) => [item.id, item.name]))
+    const rows = snapshot.transactions.map((item) => [item.occurred_on, item.type === "income" ? "Thu nhập" : "Chi tiêu", item.category_id ? categoryMap.get(item.category_id) ?? "" : "", item.amount, item.note ?? ""])
+    const csv = [["Ngày", "Loại", "Danh mục", "Số tiền", "Ghi chú"], ...rows].map((row) => row.map(csvEscape).join(",")).join("\n")
+    downloadFile(`giao-dich-${new Date().toISOString().slice(0, 10)}.csv`, `\uFEFF${csv}`, "text/csv;charset=utf-8")
+  }
+
+  async function handleImport(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    try {
+      const parsed = JSON.parse(await file.text()) as Partial<LocalSnapshot>
+      const imported = {
+        categories: Array.isArray(parsed.categories) ? parsed.categories : [],
+        transactions: Array.isArray(parsed.transactions) ? parsed.transactions : [],
+        budgets: Array.isArray(parsed.budgets) ? parsed.budgets : [],
+        recurring_templates: Array.isArray(parsed.recurring_templates) ? parsed.recurring_templates : [],
+        debts: Array.isArray(parsed.debts) ? parsed.debts : [],
+        debt_payments: Array.isArray(parsed.debt_payments) ? parsed.debt_payments : [],
+      } as LocalSnapshot
+      await importLocalSnapshot({ ...EMPTY_SNAPSHOT, ...imported })
+      setMessage("Đã nhập dữ liệu vào máy và đưa vào hàng đợi đồng bộ.")
+    } catch {
+      setMessage("File không hợp lệ hoặc không đọc được.")
+    }
+    event.target.value = ""
+  }
+
+  return <div className="mx-auto max-w-md space-y-6"><div><h1 className="text-xl font-semibold">Sao lưu &amp; đồng bộ</h1><p className="mt-1 text-sm text-muted-foreground">Dữ liệu chính nằm trên thiết bị; Supabase là bản đồng bộ từ xa.</p></div>
+    <Card><CardHeader><CardTitle>Trạng thái đồng bộ</CardTitle></CardHeader><CardContent className="space-y-3"><p className="text-sm text-muted-foreground">{syncStatus.phase === "syncing" ? "Đang đồng bộ…" : syncStatus.phase === "offline" ? "Đang offline" : syncStatus.phase === "signed-out" ? "Chưa đăng nhập Supabase" : syncStatus.phase === "error" ? `Lỗi: ${syncStatus.error}` : syncStatus.lastSyncedAt ? `Lần cuối: ${new Date(syncStatus.lastSyncedAt).toLocaleString("vi-VN")}` : "Chưa đồng bộ trong phiên này"}{syncStatus.pending > 0 ? ` · ${syncStatus.pending} thay đổi đang chờ` : ""}</p><Button className="w-full" variant="outline" onClick={() => void syncNow()} disabled={syncStatus.phase === "syncing"}><RefreshCw className={syncStatus.phase === "syncing" ? "animate-spin" : ""} />Đồng bộ ngay</Button></CardContent></Card>
+    <Card><CardHeader><CardTitle>Xuất dữ liệu local</CardTitle></CardHeader><CardContent className="space-y-3"><p className="text-sm text-muted-foreground">Tải bản sao đang hiển thị trên thiết bị, không cần chờ mạng.</p><div className="flex flex-wrap gap-2"><Button onClick={exportJSON}><Download />Xuất JSON</Button><Button variant="outline" onClick={exportCSV}>Xuất CSV</Button></div></CardContent></Card>
+    <Card><CardHeader><CardTitle>Nhập dữ liệu</CardTitle></CardHeader><CardContent className="space-y-3"><p className="text-sm text-muted-foreground">Dữ liệu được thêm vào local trước rồi tự đồng bộ khi có mạng.</p>{message && <p className="rounded-md bg-muted p-2 text-sm">{message}</p>}<div className="space-y-1.5"><Label htmlFor="backup-file">File backup (.json)</Label><label className="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border bg-background text-sm font-medium hover:bg-muted" htmlFor="backup-file"><Upload className="size-4" />Chọn file JSON</label><input id="backup-file" type="file" accept="application/json" className="sr-only" onChange={handleImport} /></div></CardContent></Card>
+  </div>
 }

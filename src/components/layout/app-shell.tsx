@@ -10,15 +10,20 @@ import {
   Landmark,
   LayoutDashboard,
   Menu,
+  Cloud,
+  CloudOff,
+  LoaderCircle,
   Plus,
   Repeat,
   Tags,
   Wallet,
   X,
 } from "lucide-react"
-import { signOut } from "@/lib/actions/auth"
 import { cn } from "@/lib/utils"
-import { SubmitButton } from "@/components/ui/submit-button"
+import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/client"
+import { syncNow } from "@/lib/local/sync"
+import { useSyncStatus } from "@/components/local-data-provider"
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Tổng quan", icon: LayoutDashboard },
@@ -82,6 +87,26 @@ function NavLinks({
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const syncStatus = useSyncStatus()
+
+  async function handleSignOut() {
+    await syncNow()
+    await createClient().auth.signOut()
+    window.location.href = "/login"
+  }
+
+  const SyncIcon = syncStatus.phase === "syncing"
+    ? LoaderCircle
+    : syncStatus.phase === "offline" || syncStatus.phase === "error"
+      ? CloudOff
+      : Cloud
+  const syncLabel = syncStatus.phase === "syncing"
+    ? "Đang đồng bộ"
+    : syncStatus.pending > 0
+      ? `${syncStatus.pending} thay đổi đang chờ`
+      : syncStatus.lastSyncedAt
+        ? "Đã đồng bộ"
+        : "Dữ liệu trên máy"
 
   return (
     <div className="min-h-screen md:flex">
@@ -93,15 +118,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <NavLinks pathname={pathname} />
         </div>
         <div className="border-t p-2">
-          <form action={signOut}>
-            <SubmitButton
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start"
-            >
-              Đăng xuất
-            </SubmitButton>
-          </form>
+          <Button variant="ghost" size="sm" className="mb-1 w-full justify-start text-muted-foreground" onClick={() => void syncNow()}>
+            <SyncIcon className={cn("size-3.5", syncStatus.phase === "syncing" && "animate-spin")} />
+            <span className="truncate">{syncLabel}</span>
+          </Button>
+          <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleSignOut}>Đăng xuất</Button>
         </div>
       </aside>
 
@@ -143,15 +164,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               onNavigate={() => setDrawerOpen(false)}
             />
             <div className="mt-2 border-t p-2">
-              <form action={signOut}>
-                <SubmitButton
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start"
-                >
-                  Đăng xuất
-                </SubmitButton>
-              </form>
+              <Button variant="ghost" size="sm" className="mb-1 w-full justify-start text-muted-foreground" onClick={() => void syncNow()}>
+                <SyncIcon className={cn("size-3.5", syncStatus.phase === "syncing" && "animate-spin")} />
+                {syncLabel}
+              </Button>
+              <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleSignOut}>Đăng xuất</Button>
             </div>
           </div>
         </div>

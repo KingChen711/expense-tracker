@@ -1,6 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Category, RecurringTemplate, TransactionType } from "@/lib/types"
-import { SubmitButton } from "@/components/ui/submit-button"
+import { saveRecurring } from "@/lib/local/repository"
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10)
@@ -26,16 +27,16 @@ const TYPE_ITEMS = [
 export function RecurringForm({
   categories,
   template,
-  action,
 }: {
   categories: Category[]
   template?: RecurringTemplate
-  action: (formData: FormData) => void
 }) {
+  const router = useRouter()
   const [type, setType] = useState<TransactionType>(template?.type ?? "expense")
   const [categoryId, setCategoryId] = useState<string | null>(
     template?.category_id ?? null
   )
+  const [saving, setSaving] = useState(false)
 
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.type === type),
@@ -55,8 +56,25 @@ export function RecurringForm({
     setCategoryId(null)
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setSaving(true)
+    const formData = new FormData(event.currentTarget)
+    await saveRecurring({
+      id: template?.id,
+      type,
+      category_id: categoryId,
+      amount: Number(formData.get("amount")),
+      day_of_month: Number(formData.get("day_of_month")),
+      start_date: String(formData.get("start_date")),
+      note: String(formData.get("note") || "").trim() || null,
+      active: template ? formData.get("active") === "on" : true,
+    })
+    router.push("/recurring")
+  }
+
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="type">Loại giao dịch</Label>
         <Select
@@ -162,9 +180,7 @@ export function RecurringForm({
         </div>
       )}
 
-      <SubmitButton className="w-full">
-        {template ? "Lưu thay đổi" : "Thêm giao dịch định kỳ"}
-      </SubmitButton>
+      <Button type="submit" className="w-full" disabled={saving}>{saving ? "Đang lưu…" : template ? "Lưu thay đổi" : "Thêm giao dịch định kỳ"}</Button>
     </form>
   )
 }

@@ -1,37 +1,16 @@
-import { notFound } from "next/navigation"
-import { getCategories } from "@/lib/data/categories"
-import { getRecurringTemplateById } from "@/lib/data/recurring"
-import { updateRecurringTemplate } from "@/lib/actions/recurring"
+"use client"
+
+import { useParams } from "next/navigation"
 import { RecurringForm } from "@/components/recurring/recurring-form"
+import { useLocalData } from "@/components/local-data-provider"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default async function EditRecurringPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = await params
-  const [categories, template] = await Promise.all([
-    getCategories(),
-    getRecurringTemplateById(id),
-  ])
-
-  if (!template) notFound()
-
-  const updateWithId = updateRecurringTemplate.bind(null, id)
-
-  return (
-    <Card className="mx-auto max-w-md">
-      <CardHeader>
-        <CardTitle>Sửa giao dịch định kỳ</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <RecurringForm
-          categories={categories}
-          template={template}
-          action={updateWithId}
-        />
-      </CardContent>
-    </Card>
-  )
+export default function EditRecurringPage() {
+  const { id } = useParams<{ id: string }>()
+  const { snapshot, loading } = useLocalData()
+  const record = snapshot.recurring_templates.find((item) => item.id === id)
+  if (loading) return <p className="text-sm text-muted-foreground">Đang mở dữ liệu trên máy…</p>
+  if (!record) return <p className="text-sm text-muted-foreground">Không tìm thấy giao dịch định kỳ.</p>
+  const template = { ...record, category: snapshot.categories.find((item) => item.id === record.category_id) ?? null }
+  return <Card className="mx-auto max-w-md"><CardHeader><CardTitle>Sửa giao dịch định kỳ</CardTitle></CardHeader><CardContent><RecurringForm categories={snapshot.categories} template={template} /></CardContent></Card>
 }

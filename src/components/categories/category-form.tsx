@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Category, TransactionType } from "@/lib/types"
-import { SubmitButton } from "@/components/ui/submit-button"
+import { saveCategory } from "@/lib/local/repository"
 
 const TYPE_ITEMS = [
   { value: "expense", label: "Chi tiêu" },
@@ -21,15 +22,28 @@ const TYPE_ITEMS = [
 
 export function CategoryForm({
   category,
-  action,
 }: {
   category?: Category
-  action: (formData: FormData) => void
 }) {
+  const router = useRouter()
   const [color, setColor] = useState(category?.color ?? "#6b7280")
+  const [saving, setSaving] = useState(false)
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setSaving(true)
+    const formData = new FormData(event.currentTarget)
+    await saveCategory({
+      id: category?.id,
+      name: String(formData.get("name")),
+      type: formData.get("type") as TransactionType,
+      color: String(formData.get("color")),
+    })
+    router.push("/categories")
+  }
 
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name">Tên danh mục</Label>
         <Input
@@ -73,9 +87,9 @@ export function CategoryForm({
         </div>
       </div>
 
-      <SubmitButton className="w-full">
-        {category ? "Lưu thay đổi" : "Thêm danh mục"}
-      </SubmitButton>
+      <Button type="submit" className="w-full" disabled={saving}>
+        {saving ? "Đang lưu…" : category ? "Lưu thay đổi" : "Thêm danh mục"}
+      </Button>
     </form>
   )
 }

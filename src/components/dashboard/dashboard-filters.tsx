@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { SubmitButton } from "@/components/ui/submit-button"
+import { Button } from "@/components/ui/button"
 
 export function DashboardFilters({
   defaultValues,
@@ -29,7 +29,7 @@ export function DashboardFilters({
       </div>
 
       <div className="flex items-center gap-2">
-        <SubmitButton>Lọc</SubmitButton>
+        <Button type="submit">Lọc</Button>
         {hasFilters && (
           <Link href="/dashboard" className="text-sm text-muted-foreground underline">
             Xoá lọc

@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Category } from "@/lib/types"
-import { SubmitButton } from "@/components/ui/submit-button"
+import { Button } from "@/components/ui/button"
 
 const TYPE_ITEMS = [
   { value: "all", label: "Tất cả" },
@@ -106,7 +106,7 @@ export function TransactionFilters({
       </div>
 
       <div className="flex items-center gap-2">
-        <SubmitButton>Lọc</SubmitButton>
+        <Button type="submit">Lọc</Button>
         {hasFilters && (
           <Link href="/transactions" className="text-sm text-muted-foreground underline">
             Xoá lọc

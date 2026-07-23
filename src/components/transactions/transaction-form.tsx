@@ -1,12 +1,13 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Category, Transaction, TransactionType } from "@/lib/types"
-import { SubmitButton } from "@/components/ui/submit-button"
+import { saveTransaction } from "@/lib/local/repository"
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10)
@@ -16,19 +17,19 @@ export function TransactionForm({
   categories,
   recentCategoryIds = [],
   transaction,
-  action,
 }: {
   categories: Category[]
   recentCategoryIds?: string[]
   transaction?: Transaction
-  action: (formData: FormData) => void
 }) {
+  const router = useRouter()
   const [type, setType] = useState<TransactionType>(
     transaction?.type ?? "expense"
   )
   const [categoryId, setCategoryId] = useState<string | null>(
     transaction?.category_id ?? null
   )
+  const [saving, setSaving] = useState(false)
 
   const filteredCategories = useMemo(
     () => categories.filter((c) => c.type === type),
@@ -56,8 +57,23 @@ export function TransactionForm({
     setCategoryId(null)
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setSaving(true)
+    const formData = new FormData(event.currentTarget)
+    await saveTransaction({
+      id: transaction?.id,
+      type,
+      category_id: categoryId,
+      amount: Number(formData.get("amount")),
+      occurred_on: String(formData.get("occurred_on")),
+      note: String(formData.get("note") || "").trim() || null,
+    })
+    router.push("/transactions")
+  }
+
   return (
-    <form action={action} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
         <Label htmlFor="type">Loại giao dịch</Label>
         <input type="hidden" name="type" value={type} />
@@ -163,9 +179,9 @@ export function TransactionForm({
       </div>
       </div>
 
-      <SubmitButton className="h-11 w-full text-base">
-        {transaction ? "Lưu thay đổi" : "Thêm giao dịch"}
-      </SubmitButton>
+      <Button type="submit" className="h-11 w-full text-base" disabled={saving}>
+        {saving ? "Đang lưu…" : transaction ? "Lưu thay đổi" : "Thêm giao dịch"}
+      </Button>
     </form>
   )
 }

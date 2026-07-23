@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chi tiêu
 
-## Getting Started
+Ứng dụng quản lý chi tiêu cá nhân xây bằng Next.js và Supabase.
 
-First, run the development server:
+## Kiến trúc local-first
+
+- UI đọc và ghi dữ liệu từ IndexedDB trên thiết bị, vì vậy các thao tác chính không phải chờ mạng.
+- Mỗi thay đổi được đưa vào outbox và tự đồng bộ lên Supabase khi có mạng.
+- Khi mở app, quay lại foreground hoặc bấm **Đồng bộ ngay**, app đẩy outbox rồi tải snapshot mới nhất về máy.
+- Supabase Auth và Row Level Security vẫn bảo vệ bản dữ liệu từ xa.
+- Nếu chưa đăng nhập hoặc Supabase tạm chậm, dữ liệu local vẫn sử dụng bình thường.
+
+Quy tắc xung đột phù hợp cho app cá nhân hai thiết bị là lần đồng bộ cuối cùng thắng. Giao dịch định kỳ dùng ID xác định theo template và tháng để tránh tạo trùng giữa các thiết bị.
+
+> Dữ liệu chưa đồng bộ chỉ tồn tại trong browser hiện tại. Không xóa site data trước khi trạng thái hiển thị **Đã đồng bộ**, và nên xuất JSON định kỳ.
+
+## Chạy local
+
+Tạo `.env.local` từ `.env.local.example`, điền Supabase URL và anon key, sau đó:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mở [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Kiểm tra production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+App có thể tiếp tục deploy trên Vercel Free. Các route dữ liệu chính được prerender thành static shell; Supabase chỉ nằm trên đường đồng bộ nền thay vì chặn render UI.

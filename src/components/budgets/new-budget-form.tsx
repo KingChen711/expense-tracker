@@ -1,5 +1,7 @@
 "use client"
 
+import { useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,17 +13,26 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Category } from "@/lib/types"
-import { SubmitButton } from "@/components/ui/submit-button"
+import { saveBudget } from "@/lib/local/repository"
 
 export function NewBudgetForm({
   categories,
-  action,
 }: {
   categories: Category[]
-  action: (formData: FormData) => void
 }) {
+  const router = useRouter()
+  const [saving, setSaving] = useState(false)
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setSaving(true)
+    const formData = new FormData(event.currentTarget)
+    await saveBudget({ category_id: String(formData.get("category_id")), limit_amount: Number(formData.get("limit_amount")) })
+    router.push("/budgets")
+  }
+
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="category_id">Danh mục</Label>
         <Select
@@ -54,9 +65,7 @@ export function NewBudgetForm({
         />
       </div>
 
-      <SubmitButton className="w-full">
-        Thêm ngân sách
-      </SubmitButton>
+      <Button type="submit" className="w-full" disabled={saving}>{saving ? "Đang lưu…" : "Thêm ngân sách"}</Button>
     </form>
   )
 }

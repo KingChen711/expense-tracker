@@ -1,4 +1,3 @@
-import { createCategory } from "@/lib/actions/categories"
 import { CategoryForm } from "@/components/categories/category-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -9,7 +8,7 @@ export default function NewCategoryPage() {
         <CardTitle>Thêm danh mục</CardTitle>
       </CardHeader>
       <CardContent>
-        <CategoryForm action={createCategory} />
+        <CategoryForm />
       </CardContent>
     </Card>
   )

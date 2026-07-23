@@ -1,6 +1,8 @@
-const CACHE_NAME = "chi-tieu-v1"
+const CACHE_NAME = "chi-tieu-local-v2"
+const APP_SHELL = ["/", "/dashboard", "/transactions", "/manifest.json"]
 
-self.addEventListener("install", () => {
+self.addEventListener("install", (event) => {
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)))
   self.skipWaiting()
 })
 
@@ -25,17 +27,42 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return
 
   const isNavigation = request.mode === "navigate"
-  const isStaticAsset = url.pathname.startsWith("/_next/static/")
+  const isStaticAsset =
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/icons/") ||
+    url.pathname === "/manifest.json"
+  const isNextData = request.headers.get("RSC") === "1" || url.searchParams.has("_rsc")
 
   if (isNavigation) {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone()
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy))
+      caches.match(request).then((cached) => {
+        const network = fetch(request)
+          .then((response) => {
+            if (response.ok) {
+              const copy = response.clone()
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, copy))
+            }
+            return response
+          })
+          .catch(() => cached ?? caches.match("/dashboard"))
+        return cached ?? network
+      })
+    )
+    return
+  }
+
+  if (isNextData) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        const network = fetch(request).then((response) => {
+          if (response.ok) {
+            const copy = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy))
+          }
           return response
         })
-        .catch(() => caches.match(request))
+        return cached ?? network
+      })
     )
     return
   }
